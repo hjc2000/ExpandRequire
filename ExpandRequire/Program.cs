@@ -15,7 +15,7 @@ while (true)
 	string? lua_file_path = lua_content.ParseFirstRequiredModulePath();
 	if (lua_file_path is null)
 	{
-		lua_content.TrimEmptyLine();
+		lua_content = lua_content.TrimEmptyLine();
 		Console.WriteLine(lua_content);
 		return;
 	}
@@ -24,5 +24,5 @@ while (true)
 	using StreamReader sr = new(fs);
 	string required_module_content = sr.ReadToEnd();
 	lua_content = lua_content.RemoveFirstRequiredModule();
-	lua_content = $"{required_module_content}\n{lua_content}";
+	lua_content = $"{required_module_content}\r\n{lua_content}";
 }

@@ -82,12 +82,12 @@ internal static class LuaRequireExpandingExtension
 	{
 		while (lua_code_content.Contains("\n\n"))
 		{
-			lua_code_content = lua_code_content.Replace("\n\n", null);
+			lua_code_content = lua_code_content.Replace("\n\n", "\n");
 		}
 
 		while (lua_code_content.Contains("\r\n\r\n"))
 		{
-			lua_code_content = lua_code_content.Replace("\r\n\r\n", null);
+			lua_code_content = lua_code_content.Replace("\r\n\r\n", "\r\n");
 		}
 
 		lua_code_content = lua_code_content.Trim();
