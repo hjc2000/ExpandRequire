@@ -10,15 +10,19 @@ require(""Servo.Monitor"")
 require(""Detector.AccelerationDetector"")
 ";
 
-string? lua_file_path = LuaRequireParser.ParseRequiredModulePath(lua_content);
-Console.WriteLine(lua_file_path);
-
-if (lua_file_path is null)
+while (true)
 {
-	Console.WriteLine("没有解析到 lua 文件路径");
-	return;
-}
+	string? lua_file_path = lua_content.ParseFirstRequiredModulePath();
+	if (lua_file_path is null)
+	{
+		lua_content.TrimEmptyLine();
+		Console.WriteLine(lua_content);
+		return;
+	}
 
-using FileStream fs = File.OpenRead(lua_file_path);
-using StreamReader sr = new(fs);
-Console.WriteLine(sr.ReadToEnd());
+	using FileStream fs = File.OpenRead(lua_file_path);
+	using StreamReader sr = new(fs);
+	string required_module_content = sr.ReadToEnd();
+	lua_content = lua_content.RemoveFirstRequiredModule();
+	lua_content = $"{required_module_content}\n{lua_content}";
+}
