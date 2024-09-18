@@ -1,7 +1,24 @@
-﻿string? lua_libs_path = Environment.GetEnvironmentVariable("lua_libs");
-if (lua_libs_path is null)
+﻿using ExpandRequire;
+
+string lua_content = @"require(""Servo.EI"")
+require(""Servo.Param"")
+require(""Servo.EO"")
+require(""Servo.Core"")
+require(""Servo.Feedback"")
+require(""Servo.Mode7"")
+require(""Servo.Monitor"")
+require(""Detector.AccelerationDetector"")
+";
+
+string? lua_file_path = LuaRequireParser.ParseRequiredModulePath(lua_content);
+Console.WriteLine(lua_file_path);
+
+if (lua_file_path is null)
 {
-	Console.WriteLine("不存在环境变量：lua_libs");
+	Console.WriteLine("没有解析到 lua 文件路径");
+	return;
 }
 
-Console.WriteLine($"从环境变量 lua_libs 中得到 lua 库路径：{lua_libs_path}");
+using FileStream fs = File.OpenRead(lua_file_path);
+using StreamReader sr = new(fs);
+Console.WriteLine(sr.ReadToEnd());
