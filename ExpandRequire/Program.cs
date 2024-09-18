@@ -10,19 +10,33 @@ require(""Servo.Monitor"")
 require(""Detector.AccelerationDetector"")
 ";
 
+// 已经导入过了的路径就放到这里，导入前查重，避免重复导入
+HashSet<string> imported_lua_path_set = [];
+
 while (true)
 {
 	string? lua_file_path = lua_content.ParseFirstRequiredModulePath();
 	if (lua_file_path is null)
 	{
+		// 找不到 require 指令了
 		lua_content = lua_content.TrimEmptyLine();
 		Console.WriteLine(lua_content);
+		if (lua_content.Contains("require"))
+		{
+			throw new Exception("未展开干净");
+		}
+
 		return;
 	}
 
-	using FileStream fs = File.OpenRead(lua_file_path);
-	using StreamReader sr = new(fs);
-	string required_module_content = sr.ReadToEnd();
+	// 仍然找得到 require 指令
 	lua_content = lua_content.RemoveFirstRequiredModule();
-	lua_content = $"{required_module_content}\r\n{lua_content}";
+	if (!imported_lua_path_set.Contains(lua_file_path))
+	{
+		// 此路径的 lua 文件还没导入过
+		imported_lua_path_set.Add(lua_file_path);
+		using FileStream fs = File.OpenRead(lua_file_path);
+		using StreamReader sr = new(fs);
+		lua_content = $"{sr.ReadToEnd()}\r\n{lua_content}";
+	}
 }
