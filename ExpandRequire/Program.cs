@@ -1,5 +1,15 @@
 ﻿using ExpandRequire;
 
+EnumerationOptions options = new()
+{
+	RecurseSubdirectories = true,
+};
+
+foreach (string path in Directory.EnumerateFiles("D:\\repos\\ElectricBatch", "*", options))
+{
+	Console.WriteLine(path);
+}
+
 string lua_code_content = @"require(""Servo.EI"")
 require(""Servo.Param"")
 require(""Servo.EO"")
@@ -40,3 +50,4 @@ while (true)
 		lua_code_content = $"{sr.ReadToEnd()}\r\n{lua_code_content}";
 	}
 }
+
