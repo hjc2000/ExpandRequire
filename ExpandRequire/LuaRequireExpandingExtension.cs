@@ -175,7 +175,7 @@ internal static class LuaRequireExpandingExtension
 	/// <param name="lua_code_content"></param>
 	public static void Output(this string lua_code_content)
 	{
-		using FileStream out_file = File.Open("out.lua", FileMode.Create,
+		using FileStream out_file = File.Open("out/out.lua", FileMode.Create,
 			FileAccess.ReadWrite, FileShare.Read);
 
 		using StreamWriter writer = new(out_file);
