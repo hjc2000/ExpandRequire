@@ -43,7 +43,7 @@ internal static class NameSimplifyingHelper
 	public static string SimplifyName(this string lua_code_content)
 	{
 		StringReader reader = new(lua_code_content);
-		HashSet<string> sub_name_set = lua_code_content.CollectSubFunctionName();
+		HashSet<string> sub_name_set = lua_code_content.CollectFunctionName();
 		List<string> sub_name_list = sub_name_set.ToList();
 
 		// 将长的排到前面优先替换，避免长的名称中有一部分含有短名称
@@ -67,7 +67,7 @@ internal static class NameSimplifyingHelper
 		return $"A{_name_id++}";
 	}
 
-	private static HashSet<string> CollectSubFunctionName(this string lua_code_content)
+	private static HashSet<string> CollectFunctionName(this string lua_code_content)
 	{
 		StringReader reader = new(lua_code_content);
 		HashSet<string> sub_name_set = [];
