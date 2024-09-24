@@ -45,6 +45,8 @@ internal static class NameSimplifyingHelper
 		StringReader reader = new(lua_code_content);
 		HashSet<string> sub_name_set = lua_code_content.CollectSubFunctionName();
 		List<string> sub_name_list = sub_name_set.ToList();
+
+		// 将长的排到前面优先替换，避免长的名称中有一部分含有短名称
 		sub_name_list.Sort(new StringLengthComparer());
 		foreach (string sub_name in sub_name_list)
 		{
