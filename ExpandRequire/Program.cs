@@ -31,12 +31,7 @@ while (true)
 		imported_lua_path_set.Add(lua_file_path);
 		using FileStream fs = File.OpenRead(lua_file_path);
 		using StreamReader sr = new(fs);
-
-		main_file_content = "\r\n\r\n\r\n\r\n\r\n" +
-			$"------------------------------------------------------\r\n" +
-			$"-- {lua_file_path}\r\n" +
-			$"------------------------------------------------------\r\n" +
-			$"{sr.ReadToEnd()}\r\n{main_file_content}";
+		main_file_content = $"{sr.ReadToEnd()}\r\n{main_file_content}";
+		main_file_content = main_file_content.AddTitle(lua_file_path);
 	}
 }
-

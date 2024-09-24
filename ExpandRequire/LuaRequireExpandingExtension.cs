@@ -21,13 +21,8 @@ internal static class LuaRequireExpandingExtension
 
 		using StreamReader reader = new(main_file);
 		string main_file_content = reader.ReadToEnd();
-
-		main_file_content = "\r\n\r\n\r\n\r\n\r\n" +
-			$"------------------------------------------------------\r\n" +
-			$"-- main\r\n" +
-			$"------------------------------------------------------\r\n" +
-			$"{reader.ReadToEnd()}\r\n{main_file_content}";
-
+		main_file_content = $"{reader.ReadToEnd()}\r\n{main_file_content}";
+		main_file_content = main_file_content.AddTitle("main");
 		return main_file_content;
 	}
 
@@ -80,12 +75,8 @@ internal static class LuaRequireExpandingExtension
 			Console.WriteLine(path);
 			using FileStream fs = File.OpenRead(path);
 			using StreamReader reader = new(fs);
-
-			main_lua_file_content = "\r\n\r\n\r\n\r\n\r\n" +
-				$"------------------------------------------------------\r\n" +
-				$"-- {path}\r\n" +
-				$"------------------------------------------------------\r\n" +
-				$"{reader.ReadToEnd()}\r\n{main_lua_file_content}";
+			main_lua_file_content = $"{reader.ReadToEnd()}\r\n{main_lua_file_content}";
+			main_lua_file_content = main_lua_file_content.AddTitle(path);
 		}
 
 		return main_lua_file_content;
@@ -194,6 +185,23 @@ internal static class LuaRequireExpandingExtension
 
 		lua_code_content = lua_code_content.Trim();
 		return lua_code_content;
+	}
+
+	/// <summary>
+	///		给内容添加标题
+	/// </summary>
+	/// <param name="content"></param>
+	/// <param name="title"></param>
+	/// <returns></returns>
+	public static string AddTitle(this string content, string title)
+	{
+		content = "\r\n\r\n\r\n\r\n\r\n" +
+			$"------------------------------------------------------\r\n" +
+			$"-- {title}\r\n" +
+			$"------------------------------------------------------\r\n" +
+			$"{content}";
+
+		return content;
 	}
 
 	/// <summary>
