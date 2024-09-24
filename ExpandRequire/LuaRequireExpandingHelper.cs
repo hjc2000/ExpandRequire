@@ -13,7 +13,7 @@ internal static class LuaRequireExpandingHelper
 	/// <exception cref="Exception"></exception>
 	public static void ExpandRequire()
 	{
-		string main_file_content = LuaRequireExpandingHelper.GetMainFileContent();
+		string main_file_content = GetMainFileContent();
 		main_file_content = main_file_content.AddWorkspaceFiles();
 
 		// 已经导入过了的路径就放到这里，导入前查重，避免重复导入
@@ -32,6 +32,7 @@ internal static class LuaRequireExpandingHelper
 					throw new Exception("未展开干净");
 				}
 
+				main_file_content = main_file_content.SimplifyName();
 				main_file_content.Output();
 				return;
 			}
