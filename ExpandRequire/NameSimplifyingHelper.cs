@@ -12,7 +12,7 @@ internal static class NameSimplifyingHelper
 		StringReader reader = new(lua_code_content);
 		HashSet<string> name_set = lua_code_content.CollectFunctionName();
 		List<string> name_list = name_set.ToList();
-		name_list.Sort(new StringLengthComparer(StringLengthComparer.Order.FromLongToShort));
+		name_list.Sort(new StringLengthComparer(StringLengthComparer.OrderEnum.FromLongToShort));
 		foreach (string name in name_list)
 		{
 			string simple_name = GetNewName();
