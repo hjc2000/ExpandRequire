@@ -5,10 +5,53 @@ namespace ExpandRequire;
 internal static class LuaRequireExpandingExtension
 {
 	/// <summary>
+	///		将当前路径下的 main.lua 的依赖展开。
+	/// </summary>
+	/// <exception cref="Exception"></exception>
+	public static void ExpandRequire()
+	{
+		string main_file_content = LuaRequireExpandingExtension.GetMainFileContent();
+		main_file_content = main_file_content.AddWorkspaceFiles();
+
+		// 已经导入过了的路径就放到这里，导入前查重，避免重复导入
+		HashSet<string> imported_lua_path_set = [];
+
+		while (true)
+		{
+			string? lua_file_path = main_file_content.ParseFirstRequiredModulePath();
+			if (lua_file_path is null)
+			{
+				// 找不到 require 指令了
+				main_file_content = main_file_content.TrimEmptyLine();
+				main_file_content = $"{main_file_content}\r\n";
+				if (main_file_content.Contains("require"))
+				{
+					throw new Exception("未展开干净");
+				}
+
+				main_file_content.Output();
+				return;
+			}
+
+			// 仍然找得到 require 指令
+			main_file_content = main_file_content.RemoveFirstRequiredModule();
+			if (!imported_lua_path_set.Contains(lua_file_path))
+			{
+				// 此路径的 lua 文件还没导入过
+				imported_lua_path_set.Add(lua_file_path);
+				using FileStream fs = File.OpenRead(lua_file_path);
+				using StreamReader sr = new(fs);
+				main_file_content = $"{sr.ReadToEnd()}\r\n{main_file_content}";
+				main_file_content = main_file_content.AddTitle(lua_file_path);
+			}
+		}
+	}
+
+	/// <summary>
 	///		获取本可执行文件当前路径下的 main.lua 的内容。
 	/// </summary>
 	/// <returns></returns>
-	public static string GetMainFileContent()
+	private static string GetMainFileContent()
 	{
 #if DEBUG
 		string main_file_path = "D:/repos/ElectricBatch/main.lua";
@@ -31,7 +74,7 @@ internal static class LuaRequireExpandingExtension
 	/// </summary>
 	/// <param name="main_lua_file_content">main.lua 的内容</param>
 	/// <returns>返回 main_lua_file_content 添加了工作区中其他 lua 文件后的字符串。</returns>
-	public static string AddWorkspaceFiles(this string main_lua_file_content)
+	private static string AddWorkspaceFiles(this string main_lua_file_content)
 	{
 		EnumerationOptions options = new()
 		{
@@ -87,7 +130,7 @@ internal static class LuaRequireExpandingExtension
 	/// </summary>
 	/// <param name="lua_code_content"></param>
 	/// <returns></returns>
-	public static string? ParseFirstRequiredModule(this string lua_code_content)
+	private static string? ParseFirstRequiredModule(this string lua_code_content)
 	{
 		string require_path = lua_code_content.Cut(@"require(""", @""")");
 		if (require_path != string.Empty)
@@ -110,7 +153,7 @@ internal static class LuaRequireExpandingExtension
 	/// <param name="lua_code_content"></param>
 	/// <returns></returns>
 	/// <exception cref="Exception"></exception>
-	public static string? ParseFirstRequiredModulePath(this string lua_code_content)
+	private static string? ParseFirstRequiredModulePath(this string lua_code_content)
 	{
 		string? module = ParseFirstRequiredModule(lua_code_content);
 		if (module is null)
@@ -137,7 +180,7 @@ internal static class LuaRequireExpandingExtension
 	/// </summary>
 	/// <param name="lua_code_content"></param>
 	/// <returns></returns>
-	public static string RemoveFirstRequiredModule(this string lua_code_content)
+	private static string RemoveFirstRequiredModule(this string lua_code_content)
 	{
 		string? module = ParseFirstRequiredModule(lua_code_content);
 		if (module is null)
@@ -171,7 +214,7 @@ internal static class LuaRequireExpandingExtension
 	/// </summary>
 	/// <param name="lua_code_content"></param>
 	/// <returns></returns>
-	public static string TrimEmptyLine(this string lua_code_content)
+	private static string TrimEmptyLine(this string lua_code_content)
 	{
 		while (lua_code_content.Contains("\n\n\n"))
 		{
@@ -193,7 +236,7 @@ internal static class LuaRequireExpandingExtension
 	/// <param name="content"></param>
 	/// <param name="title"></param>
 	/// <returns></returns>
-	public static string AddTitle(this string content, string title)
+	private static string AddTitle(this string content, string title)
 	{
 		content = "\r\n\r\n\r\n\r\n\r\n" +
 			$"------------------------------------------------------\r\n" +
@@ -209,7 +252,7 @@ internal static class LuaRequireExpandingExtension
 	///		<br/>* out.lua 始终是新建的空白文件。
 	/// </summary>
 	/// <param name="lua_code_content"></param>
-	public static void Output(this string lua_code_content)
+	private static void Output(this string lua_code_content)
 	{
 		if (!Directory.Exists("out"))
 		{
