@@ -1,4 +1,5 @@
 ﻿using JCNET.字符串处理;
+using System.IO;
 
 namespace ExpandRequire;
 
@@ -20,7 +21,15 @@ internal static class LuaRequireExpandingExtension
 			FileAccess.ReadWrite, FileShare.Read);
 
 		using StreamReader reader = new(main_file);
-		return reader.ReadToEnd();
+		string main_file_content = reader.ReadToEnd();
+
+		main_file_content = "\r\n\r\n\r\n\r\n\r\n" +
+			$"------------------------------------------------------\r\n" +
+			$"-- main\r\n" +
+			$"------------------------------------------------------\r\n" +
+			$"{reader.ReadToEnd()}\r\n{main_file_content}";
+
+		return main_file_content;
 	}
 
 	/// <summary>
@@ -72,7 +81,12 @@ internal static class LuaRequireExpandingExtension
 			Console.WriteLine(path);
 			using FileStream fs = File.OpenRead(path);
 			using StreamReader reader = new(fs);
-			main_lua_file_content = $"{reader.ReadToEnd()}\r\n{main_lua_file_content}";
+
+			main_lua_file_content = "\r\n\r\n\r\n\r\n\r\n" +
+				$"------------------------------------------------------\r\n" +
+				$"-- {path}\r\n" +
+				$"------------------------------------------------------\r\n" +
+				$"{reader.ReadToEnd()}\r\n{main_lua_file_content}";
 		}
 
 		return main_lua_file_content;
@@ -141,8 +155,44 @@ internal static class LuaRequireExpandingExtension
 			return lua_code_content;
 		}
 
-		lua_code_content = lua_code_content.Replace($"require(\"{module}\")", null);
-		lua_code_content = lua_code_content.Replace($"require('{module}')", null);
+		string require = $"require(\"{module}\")";
+		int index = lua_code_content.IndexOf(require);
+		if (index >= 0)
+		{
+			lua_code_content = lua_code_content[..index].Trim()
+				+ "\r\n"
+				+ lua_code_content[(index + require.Length)..].Trim();
+		}
+
+		require = $"require('{module}')";
+		index = lua_code_content.IndexOf(require);
+		if (index >= 0)
+		{
+			lua_code_content = lua_code_content[..index].Trim()
+				+ "\r\n"
+				+ lua_code_content[(index + require.Length)..].Trim();
+		}
+
+		return lua_code_content;
+	}
+
+	/// <summary>
+	///		取出连续的 2 个空行和开头、结尾的空行。
+	/// </summary>
+	/// <param name="lua_code_content"></param>
+	/// <returns></returns>
+	public static string TrimEmptyLine(this string lua_code_content)
+	{
+		while (lua_code_content.Contains("\n\n\n"))
+		{
+			lua_code_content = lua_code_content.Replace("\n\n\n", "\n\n");
+		}
+
+		while (lua_code_content.Contains("\r\n\r\n\r\n"))
+		{
+			lua_code_content = lua_code_content.Replace("\r\n\r\n\r\n", "\r\n\r\n");
+		}
+
 		lua_code_content = lua_code_content.Trim();
 		return lua_code_content;
 	}

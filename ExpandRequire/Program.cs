@@ -12,7 +12,7 @@ while (true)
 	if (lua_file_path is null)
 	{
 		// 找不到 require 指令了
-		main_file_content = main_file_content.Trim();
+		main_file_content = main_file_content.TrimEmptyLine();
 		main_file_content = $"{main_file_content}\r\n";
 		if (main_file_content.Contains("require"))
 		{
@@ -32,10 +32,10 @@ while (true)
 		using FileStream fs = File.OpenRead(lua_file_path);
 		using StreamReader sr = new(fs);
 
-		main_file_content = "\r\n\r\n\r\n" +
+		main_file_content = "\r\n\r\n\r\n\r\n\r\n" +
 			$"------------------------------------------------------\r\n" +
 			$"-- {lua_file_path}\r\n" +
-			 $"------------------------------------------------------\r\n" +
+			$"------------------------------------------------------\r\n" +
 			$"{sr.ReadToEnd()}\r\n{main_file_content}";
 	}
 }
