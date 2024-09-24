@@ -148,27 +148,6 @@ internal static class LuaRequireExpandingExtension
 	}
 
 	/// <summary>
-	///		取出连续的 2 个空行和开头、结尾的空行。
-	/// </summary>
-	/// <param name="lua_code_content"></param>
-	/// <returns></returns>
-	public static string TrimEmptyLine(this string lua_code_content)
-	{
-		while (lua_code_content.Contains("\n\n"))
-		{
-			lua_code_content = lua_code_content.Replace("\n\n", "\n");
-		}
-
-		while (lua_code_content.Contains("\r\n\r\n"))
-		{
-			lua_code_content = lua_code_content.Replace("\r\n\r\n", "\r\n");
-		}
-
-		lua_code_content = lua_code_content.Trim();
-		return lua_code_content;
-	}
-
-	/// <summary>
 	///		将 lua 代码内容字符串写入输出文件 out.lua 中。
 	///		<br/>* out.lua 始终是新建的空白文件。
 	/// </summary>

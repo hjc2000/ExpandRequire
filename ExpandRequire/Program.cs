@@ -12,7 +12,8 @@ while (true)
 	if (lua_file_path is null)
 	{
 		// 找不到 require 指令了
-		main_file_content = main_file_content.TrimEmptyLine();
+		main_file_content = main_file_content.Trim();
+		main_file_content = $"{main_file_content}\r\n";
 		if (main_file_content.Contains("require"))
 		{
 			throw new Exception("未展开干净");
