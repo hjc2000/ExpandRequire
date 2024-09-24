@@ -1,3 +1,3 @@
 ﻿using ExpandRequire;
 
-LuaRequireExpandingExtension.ExpandRequire();
+LuaRequireExpandingHelper.ExpandRequire();

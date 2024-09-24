@@ -2,7 +2,10 @@
 
 namespace ExpandRequire;
 
-internal static class LuaRequireExpandingExtension
+/// <summary>
+///		lua 依赖展开帮手。
+/// </summary>
+internal static class LuaRequireExpandingHelper
 {
 	/// <summary>
 	///		将当前路径下的 main.lua 的依赖展开。
@@ -10,7 +13,7 @@ internal static class LuaRequireExpandingExtension
 	/// <exception cref="Exception"></exception>
 	public static void ExpandRequire()
 	{
-		string main_file_content = LuaRequireExpandingExtension.GetMainFileContent();
+		string main_file_content = LuaRequireExpandingHelper.GetMainFileContent();
 		main_file_content = main_file_content.AddWorkspaceFiles();
 
 		// 已经导入过了的路径就放到这里，导入前查重，避免重复导入
