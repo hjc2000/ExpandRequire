@@ -7,51 +7,17 @@ namespace ExpandRequire;
 /// </summary>
 internal static class NameSimplifyingHelper
 {
-	private class StringLengthComparer : IComparer<string>
-	{
-		public int Compare(string? x, string? y)
-		{
-			if (x is null && y is null)
-			{
-				return 0;
-			}
-
-			if (x is null && y is not null)
-			{
-				return 1;
-			}
-
-			if (x is not null && y is null)
-			{
-				return -1;
-			}
-
-			if (x!.Length > y!.Length)
-			{
-				return -1;
-			}
-
-			if (x!.Length < y!.Length)
-			{
-				return 1;
-			}
-
-			return 0;
-		}
-	}
-
 	public static string SimplifyName(this string lua_code_content)
 	{
 		StringReader reader = new(lua_code_content);
-		HashSet<string> sub_name_set = lua_code_content.CollectFunctionName();
-		List<string> sub_name_list = sub_name_set.ToList();
-
-		// 将长的排到前面优先替换，避免长的名称中有一部分含有短名称
-		sub_name_list.Sort(new StringLengthComparer());
-		foreach (string sub_name in sub_name_list)
+		HashSet<string> name_set = lua_code_content.CollectFunctionName();
+		List<string> name_list = name_set.ToList();
+		name_list.Sort(new StringLengthComparer(StringLengthComparer.Order.FromLongToShort));
+		foreach (string name in name_list)
 		{
 			string simple_name = GetNewName();
-			lua_code_content = lua_code_content.Replace(sub_name, simple_name);
+			Console.WriteLine($"{name} => {simple_name}");
+			lua_code_content = lua_code_content.Replace(name, simple_name);
 		}
 
 		return lua_code_content;
@@ -70,7 +36,7 @@ internal static class NameSimplifyingHelper
 	private static HashSet<string> CollectFunctionName(this string lua_code_content)
 	{
 		StringReader reader = new(lua_code_content);
-		HashSet<string> sub_name_set = [];
+		HashSet<string> name_set = [];
 
 		// 先逐行读取，过一遍，把所有名称收集过来
 		while (true)
@@ -87,17 +53,9 @@ internal static class NameSimplifyingHelper
 				continue;
 			}
 
-			Console.WriteLine(function_name);
-
-			string[] sub_names = function_name.Split('.',
-				StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-
-			foreach (string sub_name in sub_names)
-			{
-				sub_name_set.Add(sub_name);
-			}
+			name_set.Add(function_name);
 		}
 
-		return sub_name_set;
+		return name_set;
 	}
 }
