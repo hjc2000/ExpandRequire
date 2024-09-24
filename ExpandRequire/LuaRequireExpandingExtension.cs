@@ -1,5 +1,4 @@
 ﻿using JCNET.字符串处理;
-using System.IO;
 
 namespace ExpandRequire;
 
@@ -204,6 +203,11 @@ internal static class LuaRequireExpandingExtension
 	/// <param name="lua_code_content"></param>
 	public static void Output(this string lua_code_content)
 	{
+		if (!Directory.Exists("out"))
+		{
+			Directory.CreateDirectory("out");
+		}
+
 		using FileStream out_file = File.Open("out/out.lua", FileMode.Create,
 			FileAccess.ReadWrite, FileShare.Read);
 
