@@ -32,7 +32,7 @@ internal static class LuaRequireExpandingHelper
 					throw new Exception("未展开干净");
 				}
 
-				main_file_content = main_file_content.SimplifyName();
+				main_file_content = main_file_content.SimplifyFunctionName();
 				main_file_content.Output();
 				return;
 			}
