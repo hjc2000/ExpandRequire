@@ -18,7 +18,6 @@ internal static class LuaRequireExpandingHelper
 
 		// 已经导入过了的路径就放到这里，导入前查重，避免重复导入
 		HashSet<string> imported_lua_path_set = [];
-
 		while (true)
 		{
 			string? lua_file_path = main_file_content.ParseFirstRequiredModulePath();
@@ -91,7 +90,8 @@ internal static class LuaRequireExpandingHelper
 		string workspace_directory = Directory.GetCurrentDirectory();
 #endif
 
-		IEnumerable<string> lua_file_paths = Directory.EnumerateFiles(workspace_directory, "*", options);
+		IEnumerable<string> lua_file_paths = Directory.EnumerateFiles(workspace_directory,
+			"*", options);
 
 		foreach (string path in lua_file_paths)
 		{
@@ -192,22 +192,20 @@ internal static class LuaRequireExpandingHelper
 			return lua_code_content;
 		}
 
-		string require = $"require(\"{module}\")";
-		int index = lua_code_content.IndexOf(require);
-		if (index >= 0)
+		CuttingMiddleResult cutting_middle_result = lua_code_content.CutMiddle($"require(\"{module}\")");
+		if (cutting_middle_result.Success)
 		{
-			lua_code_content = lua_code_content[..index].Trim()
+			lua_code_content = cutting_middle_result.Left.Trim()
 				+ "\r\n"
-				+ lua_code_content[(index + require.Length)..].Trim();
+				+ cutting_middle_result.Right.Trim();
 		}
 
-		require = $"require('{module}')";
-		index = lua_code_content.IndexOf(require);
-		if (index >= 0)
+		cutting_middle_result = lua_code_content.CutMiddle($"require('{module}')");
+		if (cutting_middle_result.Success)
 		{
-			lua_code_content = lua_code_content[..index].Trim()
+			lua_code_content = cutting_middle_result.Left.Trim()
 				+ "\r\n"
-				+ lua_code_content[(index + require.Length)..].Trim();
+				+ cutting_middle_result.Right.Trim();
 		}
 
 		return lua_code_content;
