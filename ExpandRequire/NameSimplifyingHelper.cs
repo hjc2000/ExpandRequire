@@ -63,20 +63,4 @@ internal static class NameSimplifyingHelper
 
 		return name_set;
 	}
-
-	private static HashSet<string> GetFunctionSubName(HashSet<string> function_name_set)
-	{
-		HashSet<string> sub_name_set = [];
-		foreach (string name in function_name_set)
-		{
-			string[] sub_names = name.Split('.',
-				StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-			for (int i = 1; i < sub_names.Length; i++)
-			{
-				sub_name_set.Add(sub_names[i]);
-			}
-		}
-
-		return sub_name_set;
-	}
 }
