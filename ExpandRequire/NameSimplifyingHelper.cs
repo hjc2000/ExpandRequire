@@ -18,27 +18,21 @@ internal static class NameSimplifyingHelper
 		HashSet<string> name_set = lua_code_content.CollectFunctionName();
 		foreach (string name in name_set)
 		{
-			string simple_name = GetNewName();
-			Console.WriteLine($"{name} => {simple_name}");
-			lua_code_content = lua_code_content.ReplaceWholeMatch(name, simple_name);
+			lua_code_content = lua_code_content.ReplaceWholeMatch($"function {name}", $"{name} = function");
 		}
 
+		foreach (string name in name_set)
+		{
+			ulong index = _name_index++;
+			Console.WriteLine($"{name} => {index}");
+			lua_code_content = lua_code_content.ReplaceWholeMatch(name, $"G[{index}]");
+		}
+
+		lua_code_content = lua_code_content.Replace("local G", "G");
 		return lua_code_content;
 	}
 
-	/// <summary>
-	///		将名称化简为 "a + 数字" 的形式，这里用来提供数字。
-	/// </summary>
-	private static ulong _name_id = 0;
-
-	/// <summary>
-	///		分配一个简单的名称
-	/// </summary>
-	/// <returns></returns>
-	private static string GetNewName()
-	{
-		return $"A{_name_id++}";
-	}
+	private static ulong _name_index = 0;
 
 	/// <summary>
 	///		收集 lua_code_content 中定义的所有函数的名称。
@@ -50,8 +44,6 @@ internal static class NameSimplifyingHelper
 	{
 		StringReader reader = new(lua_code_content);
 		HashSet<string> name_set = [];
-
-		// 先逐行读取，过一遍，把所有名称收集过来
 		while (true)
 		{
 			string? line = reader.ReadLine();
@@ -70,5 +62,21 @@ internal static class NameSimplifyingHelper
 		}
 
 		return name_set;
+	}
+
+	private static HashSet<string> GetFunctionSubName(HashSet<string> function_name_set)
+	{
+		HashSet<string> sub_name_set = [];
+		foreach (string name in function_name_set)
+		{
+			string[] sub_names = name.Split('.',
+				StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+			for (int i = 1; i < sub_names.Length; i++)
+			{
+				sub_name_set.Add(sub_names[i]);
+			}
+		}
+
+		return sub_name_set;
 	}
 }

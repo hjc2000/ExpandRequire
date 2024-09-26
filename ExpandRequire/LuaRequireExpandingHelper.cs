@@ -32,6 +32,7 @@ internal static class LuaRequireExpandingHelper
 				}
 
 				main_file_content = main_file_content.SimplifyFunctionName();
+				main_file_content = $"local G={{}}\r\n{main_file_content}";
 				main_file_content.Output();
 				return;
 			}
