@@ -16,13 +16,11 @@ internal static class NameSimplifyingHelper
 	{
 		StringReader reader = new(lua_code_content);
 		HashSet<string> name_set = lua_code_content.CollectFunctionName();
-		List<string> name_list = [.. name_set];
-		name_list.Sort(new StringLengthComparer(StringLengthComparer.OrderEnum.FromLongToShort));
-		foreach (string name in name_list)
+		foreach (string name in name_set)
 		{
 			string simple_name = GetNewName();
 			Console.WriteLine($"{name} => {simple_name}");
-			lua_code_content = lua_code_content.Replace(name, simple_name);
+			lua_code_content = lua_code_content.ReplaceWholeMatch(name, simple_name);
 		}
 
 		return lua_code_content;

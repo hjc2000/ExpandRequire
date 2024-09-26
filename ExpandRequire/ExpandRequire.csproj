@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JCNET" Version="11.4.0" />
+    <PackageReference Include="JCNET" Version="11.6.0" />
   </ItemGroup>
 
 </Project>
