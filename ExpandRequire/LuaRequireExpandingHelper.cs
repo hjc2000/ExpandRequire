@@ -1,4 +1,5 @@
 ﻿using JCNET.字符串处理;
+using System.Text;
 
 namespace ExpandRequire;
 
@@ -26,11 +27,6 @@ internal static class LuaRequireExpandingHelper
 				// 找不到 require 指令了
 				main_file_content = main_file_content.TrimEmptyLine();
 				main_file_content = $"{main_file_content}\r\n";
-				if (main_file_content.Contains("require"))
-				{
-					throw new Exception("未展开干净");
-				}
-
 				main_file_content = main_file_content.SimplifyFunctionName();
 				main_file_content = $"local G={{}}\r\n{main_file_content}";
 				main_file_content.Output();
@@ -45,7 +41,7 @@ internal static class LuaRequireExpandingHelper
 				imported_lua_path_set.Add(lua_file_path);
 				using FileStream fs = File.OpenRead(lua_file_path);
 				using StreamReader sr = new(fs);
-				main_file_content = $"{sr.ReadToEnd()}\r\n{main_file_content}";
+				main_file_content = $"{sr.ReadToEnd().RemoveComment()}\r\n{main_file_content}";
 				main_file_content = main_file_content.AddTitle(lua_file_path);
 			}
 		}
@@ -67,8 +63,7 @@ internal static class LuaRequireExpandingHelper
 			FileAccess.ReadWrite, FileShare.Read);
 
 		using StreamReader reader = new(main_file);
-		string main_file_content = reader.ReadToEnd();
-		main_file_content = $"{reader.ReadToEnd()}\r\n{main_file_content}";
+		string main_file_content = reader.ReadToEnd().RemoveComment();
 		main_file_content = main_file_content.AddTitle("main");
 		return main_file_content;
 	}
@@ -123,11 +118,39 @@ internal static class LuaRequireExpandingHelper
 			Console.WriteLine(path);
 			using FileStream fs = File.OpenRead(path);
 			using StreamReader reader = new(fs);
-			main_lua_file_content = $"{reader.ReadToEnd()}\r\n{main_lua_file_content}";
+			main_lua_file_content = $"{reader.ReadToEnd().RemoveComment()}\r\n{main_lua_file_content}";
 			main_lua_file_content = main_lua_file_content.AddTitle(path);
 		}
 
 		return main_lua_file_content;
+	}
+
+	/// <summary>
+	///		删除注释
+	/// </summary>
+	/// <param name="lua_code_content"></param>
+	/// <returns></returns>
+	private static string RemoveComment(this string lua_code_content)
+	{
+		StringBuilder sb = new();
+		StringReader reader = new(lua_code_content);
+		while (true)
+		{
+			string? line = reader.ReadLine();
+			if (line is null)
+			{
+				break;
+			}
+
+			if (line.Trim().StartsWith("--"))
+			{
+				continue;
+			}
+
+			sb.AppendLine(line);
+		}
+
+		return sb.ToString();
 	}
 
 	/// <summary>
