@@ -19,17 +19,23 @@ internal static class NameSimplifyingHelper
 		foreach (string name in name_set)
 		{
 			lua_code_content = lua_code_content.ReplaceTwoWord("function", name,
-				$"{name} = function");
-			Console.WriteLine(name);
+				$"{name} = function").ToString();
 		}
 
+		ReadOnlyMemory<char> memory = lua_code_content.AsMemory();
 		foreach (string name in name_set)
 		{
 			ulong index = _name_index++;
 			Console.WriteLine($"{name} => {index}");
-			lua_code_content = lua_code_content.ReplaceWholeMatch(name, $"G[{index}]");
+			if (index == 118)
+			{
+				Console.WriteLine();
+			}
+
+			memory = memory.ReplaceWholeMatch(name, $"G[{index}]");
 		}
 
+		lua_code_content = memory.ToString();
 		lua_code_content = lua_code_content.Replace("local G", "G");
 		return lua_code_content;
 	}
@@ -54,12 +60,7 @@ internal static class NameSimplifyingHelper
 				break;
 			}
 
-			string function_name = line.Cut("function", "(").Trim();
-			if (function_name == string.Empty)
-			{
-				continue;
-			}
-
+			string function_name = line.GetBetween("function", "(").Trim().ToString();
 			name_set.Add(function_name);
 		}
 

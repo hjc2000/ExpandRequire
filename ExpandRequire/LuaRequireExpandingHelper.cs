@@ -160,16 +160,16 @@ internal static class LuaRequireExpandingHelper
 	/// <returns></returns>
 	private static string? ParseFirstRequiredModule(this string lua_code_content)
 	{
-		string require_path = lua_code_content.Cut(@"require(""", @""")");
-		if (require_path != string.Empty)
+		lua_code_content = lua_code_content.GetBetween(@"require(""", @""")").ToString();
+		if (lua_code_content != string.Empty)
 		{
-			return require_path;
+			return lua_code_content;
 		}
 
-		require_path = lua_code_content.Cut(@"require('", @"')");
-		if (require_path != string.Empty)
+		lua_code_content = lua_code_content.GetBetween(@"require('", @"')").ToString();
+		if (lua_code_content != string.Empty)
 		{
-			return require_path;
+			return lua_code_content;
 		}
 
 		return null;
