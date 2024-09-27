@@ -54,7 +54,7 @@ internal static class LuaRequireExpandingHelper
 	private static string GetMainFileContent()
 	{
 #if DEBUG
-		string main_file_path = "D:/repos/ElectricBatch/main.lua";
+		string main_file_path = "F:/repos/ElectricBatch/main.lua";
 #else
 		string main_file_path = "main.lua";
 #endif
@@ -81,7 +81,7 @@ internal static class LuaRequireExpandingHelper
 		};
 
 #if DEBUG
-		string workspace_directory = "D:/repos/ElectricBatch";
+		string workspace_directory = "F:/repos/ElectricBatch";
 #else
 		string workspace_directory = Directory.GetCurrentDirectory();
 #endif

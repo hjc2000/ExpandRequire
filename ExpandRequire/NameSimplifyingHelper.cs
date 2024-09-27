@@ -18,7 +18,9 @@ internal static class NameSimplifyingHelper
 		HashSet<string> name_set = lua_code_content.CollectFunctionName();
 		foreach (string name in name_set)
 		{
-			lua_code_content = lua_code_content.ReplaceWholeMatch($"function {name}", $"{name} = function");
+			lua_code_content = lua_code_content.ReplaceTwoWord("function", name,
+				$"{name} = function");
+			Console.WriteLine(name);
 		}
 
 		foreach (string name in name_set)
