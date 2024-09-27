@@ -27,11 +27,6 @@ internal static class NameSimplifyingHelper
 		{
 			ulong index = _name_index++;
 			Console.WriteLine($"{name} => {index}");
-			if (index == 118)
-			{
-				Console.WriteLine();
-			}
-
 			memory = memory.ReplaceWholeMatch(name, $"G[{index}]");
 		}
 
@@ -61,7 +56,10 @@ internal static class NameSimplifyingHelper
 			}
 
 			string function_name = line.GetBetween("function", "(").Trim().ToString();
-			name_set.Add(function_name);
+			if (function_name != string.Empty)
+			{
+				name_set.Add(function_name);
+			}
 		}
 
 		return name_set;
