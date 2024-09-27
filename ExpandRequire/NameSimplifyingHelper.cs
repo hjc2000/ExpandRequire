@@ -35,8 +35,8 @@ internal static class NameSimplifyingHelper
 			memory = memory.ReplaceWholeMatch(name, $"G[{index}]");
 		}
 
+		memory = memory.ReplaceTwoWord("local", "G", "G");
 		lua_code_content = memory.ToString();
-		lua_code_content = lua_code_content.Replace("local G", "G");
 		return lua_code_content;
 	}
 
