@@ -21,23 +21,13 @@ internal static class LuaRequireExpandingHelper
 		}
 
 		LuaWorkspace workspace = new("F:/repos/ElectricBatch/");
-		foreach (string path in workspace.LuaFilePaths)
-		{
-			Console.WriteLine(path);
-		}
-
 		workspace.RequiredModuleSearchPaths.Add(lua_libs_path);
 
 		LuaWorkspaceContent workspace_content = workspace.GetContent();
 		workspace_content.SigleContent.ExpandRequire();
 		workspace_content.SigleContent.ToString().Output();
 
-		Lua lua = new();
-		foreach (string path in workspace.RequiredModuleSearchPaths)
-		{
-			lua.AddCustomRequireSearchPath(path);
-		}
-
+		Lua lua = workspace.GetLuaVm();
 		lua.DoString(workspace_content.OtherFileContents);
 		Dictionary<string, object> globals = lua.GetCustomGlobalTableContentsRecurse();
 		foreach (KeyValuePair<string, object> pair in globals)
