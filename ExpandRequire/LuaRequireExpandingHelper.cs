@@ -1,5 +1,7 @@
 ﻿using JCNET.Lua;
+using JCNET.字符串处理;
 using NLua;
+using System.Text;
 
 namespace ExpandRequire;
 
@@ -20,20 +22,45 @@ internal static class LuaRequireExpandingHelper
 			throw new Exception("不存在环境变量：lua_libs");
 		}
 
+#if DEBUG
 		LuaWorkspace workspace = new("F:/repos/ElectricBatch/");
+#else
+		LuaWorkspace workspace = new(Directory.GetCurrentDirectory());
+#endif
+
 		workspace.RequiredModuleSearchPaths.Add(lua_libs_path);
 
+		/* 设置好工作区路径和模块搜索路径后，利用工作区，构造出 LuaWorkspaceContent
+		 * 和 lua 虚拟机对象。
+		 */
 		LuaWorkspaceContent workspace_content = workspace.GetContent();
-		workspace_content.SigleContent.ExpandRequire();
-		workspace_content.SigleContent.ToString().Output();
-
 		Lua lua = workspace.GetLuaVm();
+
+		workspace_content.SigleContent.ExpandRequire();
+		workspace_content.SigleContent.ChangeFunctionDefinitionFormat();
+
+		// 执行非 main.lua 的代码
 		lua.DoString(workspace_content.OtherFileContents);
+
+		// 获取全局变量
 		Dictionary<string, object> globals = lua.GetCustomGlobalTableContentsRecurse();
-		foreach (KeyValuePair<string, object> pair in globals)
+		List<string> global_variable_paths = [.. globals.Keys];
+		StringLengthComparer comparer = new(StringLengthComparer.OrderEnum.FromLongToShort);
+		global_variable_paths.Sort(comparer);
+
+		ulong name_id = 0;
+		foreach (string path in global_variable_paths)
 		{
-			Console.WriteLine(pair.Key);
+			// 去除开头的点号，得到全局变量名
+			string name = path[1..];
+			Console.WriteLine(name);
+			workspace_content.SigleContent.Code = workspace_content.SigleContent.Code.ReplaceWholeMatch(name, $"G[{name_id++}]").ToString();
 		}
+
+		StringBuilder sb = new();
+		sb.AppendLine("local G={}");
+		sb.AppendLine(workspace_content.SigleContent.Code);
+		sb.ToString().Output();
 	}
 
 	/// <summary>
@@ -48,8 +75,10 @@ internal static class LuaRequireExpandingHelper
 			Directory.CreateDirectory("out");
 		}
 
-		using FileStream out_file = File.Open("out/out.lua", FileMode.Create,
-			FileAccess.ReadWrite, FileShare.Read);
+		using FileStream out_file = File.Open("out/out.lua",
+			FileMode.Create,
+			FileAccess.ReadWrite,
+			FileShare.Read);
 
 		using StreamWriter writer = new(out_file);
 		writer.Write(lua_code_content);
